@@ -41,11 +41,6 @@ export function SiteFooter() {
                   Prior issues
                 </Link>
               </li>
-              <li>
-                <Link href="/about" className="hover:text-ember-deep">
-                  Colophon
-                </Link>
-              </li>
             </ul>
           </div>
           <div className="text-[12.5px] text-ink-3">

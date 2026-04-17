@@ -110,4 +110,4 @@ MIT.
 ## Notes
 
 Not affiliated with Adaption Labs. Built as a working artifact for the Special
-Projects Lead application. See `/about` for the full framing.
+Projects Lead application.

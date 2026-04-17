@@ -7,7 +7,6 @@ import { Wordmark } from "./wordmark";
 const NAV = [
   { href: "/", label: "Draft" },
   { href: "/prior-updates", label: "Prior issues" },
-  { href: "/about", label: "Colophon" },
 ];
 
 export function SiteHeader() {
