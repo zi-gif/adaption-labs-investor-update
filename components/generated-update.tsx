@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { Card, GhostButton, SectionHeading } from "./ui";
+import { GhostButton, Panel } from "./ui";
 
 type Props = {
   month: string;
+  sender: string;
   text: string;
   streaming: boolean;
 };
@@ -27,11 +28,7 @@ function toPlainText(md: string): string {
 
 function toHtml(md: string): string {
   const escape = (s: string) =>
-    s
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
-
+    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const lines = md.split("\n");
   const html: string[] = [];
   let inUl = false;
@@ -47,7 +44,7 @@ function toHtml(md: string): string {
       close();
       const level = line.match(/^#+/)![0].length;
       html.push(
-        `<h${level} style="font-weight:600;margin-top:1em;margin-bottom:0.4em;">${escape(
+        `<h${level} style="font-weight:600;margin-top:1em;margin-bottom:0.4em;font-family:Georgia,serif;">${escape(
           line.replace(/^#+\s+/, ""),
         )}</h${level}>`,
       );
@@ -70,12 +67,12 @@ function toHtml(md: string): string {
     }
   }
   close();
-  return `<div style="font-family:Inter,Arial,sans-serif;max-width:640px;color:#1a1718;font-size:15px;">${html.join(
+  return `<div style="font-family:'Schibsted Grotesk',Arial,sans-serif;max-width:640px;color:#1a1511;font-size:15px;">${html.join(
     "\n",
   )}</div>`;
 }
 
-export function GeneratedUpdate({ month, text, streaming }: Props) {
+export function GeneratedUpdate({ month, sender, text, streaming }: Props) {
   const [copied, setCopied] = useState<"text" | "html" | null>(null);
 
   const clean = stripEmDashes(text);
@@ -116,24 +113,48 @@ export function GeneratedUpdate({ month, text, streaming }: Props) {
 
   if (!text && !streaming) {
     return (
-      <Card className="flex h-full min-h-[320px] flex-col items-center justify-center p-10 text-center">
-        <div className="mb-3 inline-block h-2 w-2 rounded-full bg-accent-soft" />
-        <p className="text-[14px] font-medium text-ink">
-          Your draft will appear here.
-        </p>
-        <p className="mt-1 max-w-[36ch] text-[13px] text-ink-soft">
-          Fill the form, then hit Generate. Claude will stream the update in real
-          time; the consistency engine runs on completion.
-        </p>
-      </Card>
+      <Panel label="Draft" aside={month} className="min-h-[420px]">
+        <div className="flex h-full min-h-[360px] flex-col items-center justify-center px-8 text-center">
+          <span className="display-italic text-[48px] leading-none text-ember-soft opacity-70">
+            “
+          </span>
+          <p
+            className="display mt-3 max-w-[30ch] text-[22px] text-ink"
+            style={{ fontVariationSettings: '"opsz" 144, "SOFT" 40' }}
+          >
+            The update writes itself once the signal is in.
+          </p>
+          <p className="mt-4 max-w-[42ch] text-[13px] leading-relaxed text-ink-3">
+            Fill the form, then press <span className="text-ink">Generate</span>
+            . Claude will stream the draft here; the consistency engine runs
+            the moment it's done.
+          </p>
+        </div>
+      </Panel>
     );
   }
 
   return (
-    <Card className="p-7">
-      <div className="mb-4 flex items-center justify-between">
-        <SectionHeading eyebrow={month} title="Draft" />
-        <div className="flex items-center gap-2">
+    <Panel
+      label={streaming ? "Drafting" : "Draft"}
+      aside={`${month}  ·  ${sender.replace(/\s*\([^)]*\)/, "")}`}
+      className="reveal-fade"
+    >
+      {/* Action strip */}
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-rule pb-4">
+        <div
+          className="display text-[26px] leading-none text-ink sm:text-[30px]"
+          style={{ fontVariationSettings: '"opsz" 144, "SOFT" 40' }}
+        >
+          Investor letter,{" "}
+          <span
+            className="display-italic text-ember-deep"
+            style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100' }}
+          >
+            {month.toLowerCase()}
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5">
           <GhostButton type="button" onClick={copyText} disabled={streaming}>
             {copied === "text" ? "Copied" : "Copy text"}
           </GhostButton>
@@ -141,16 +162,17 @@ export function GeneratedUpdate({ month, text, streaming }: Props) {
             {copied === "html" ? "Copied HTML" : "Copy HTML"}
           </GhostButton>
           <GhostButton type="button" onClick={downloadMd} disabled={streaming}>
-            Download .md
+            .md
           </GhostButton>
         </div>
       </div>
+
       <div className="prose-update">
         <ReactMarkdown>{clean}</ReactMarkdown>
         {streaming ? (
-          <span className="ml-0.5 inline-block h-4 w-[2px] animate-pulse bg-accent align-middle" />
+          <span className="caret ml-0.5 inline-block h-4 w-[6px] translate-y-[2px] bg-ember align-middle" />
         ) : null}
       </div>
-    </Card>
+    </Panel>
   );
 }

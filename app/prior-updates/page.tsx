@@ -16,18 +16,32 @@ export default function PriorUpdatesPage() {
     <>
       <SiteHeader />
       <ScenarioBanner />
-      <main className="mx-auto w-full max-w-6xl flex-1 px-6 pt-8 pb-10">
-        <div className="mb-8">
-          <h1 className="text-[32px] font-semibold tracking-tight text-ink">
-            Prior updates.
-          </h1>
-          <p className="mt-2 max-w-prose text-[15px] text-ink-soft">
-            Jan, Feb, and Mar 2026 are seeded demo updates. They contain
-            intentional narrative threads that the consistency engine reasons
-            over. You can also paste a real or hypothetical month into
-            localStorage; it will feed the engine without leaving your browser.
-          </p>
-        </div>
+      <main className="mx-auto w-full max-w-[1200px] flex-1 px-6 pt-10 pb-4">
+        <section className="reveal mb-10 grid grid-cols-1 gap-6 pt-2 sm:grid-cols-[1fr_auto] sm:items-end">
+          <div>
+            <div className="smallcaps mb-3 text-ember-deep">
+              Archive &nbsp;/&nbsp; Prior issues
+            </div>
+            <h1
+              className="display text-[64px] leading-[0.92] text-ink sm:text-[84px]"
+              style={{ fontVariationSettings: '"opsz" 144, "SOFT" 30' }}
+            >
+              What's already
+              <br />
+              <span
+                className="display-italic text-ember-deep"
+                style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100' }}
+              >
+                on the record.
+              </span>
+            </h1>
+          </div>
+          <div className="max-w-[36ch] pb-2 text-[13.5px] leading-relaxed text-ink-2 sm:text-right">
+            January through March are seeded demo letters with intentional
+            narrative threads; the consistency engine reasons over them. Add
+            your own month; it lives only in your browser.
+          </div>
+        </section>
         <PriorUpdatesView seed={seed} />
       </main>
       <SiteFooter />

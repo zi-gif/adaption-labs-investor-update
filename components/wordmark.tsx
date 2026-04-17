@@ -1,17 +1,31 @@
 import Link from "next/link";
 
-export function Wordmark({ className }: { className?: string }) {
+export function Wordmark({
+  className,
+  size = "sm",
+}: {
+  className?: string;
+  size?: "sm" | "lg";
+}) {
+  const main =
+    size === "lg"
+      ? "text-[22px] tracking-tight"
+      : "text-[15px] tracking-tight";
   return (
     <Link
       href="/"
-      className={`group inline-flex items-center gap-2 ${className ?? ""}`}
+      className={`group inline-flex items-baseline gap-2 ${className ?? ""}`}
+      aria-label="Home"
     >
-      <span className="inline-block h-2.5 w-2.5 rounded-full bg-accent transition-transform group-hover:scale-110" />
-      <span className="text-[15px] font-medium tracking-tight text-ink">
+      <span
+        className={`display ${main} text-ink transition-colors group-hover:text-ember-deep`}
+        style={{ fontVariationSettings: '"opsz" 144, "SOFT" 40' }}
+      >
         Adaption Labs
       </span>
-      <span className="text-[15px] text-ink-faint">/</span>
-      <span className="text-[15px] text-ink-soft">Investor Update</span>
+      <span className="smallcaps text-ink-4 translate-y-[-1px]">
+        Investor Update
+      </span>
     </Link>
   );
 }

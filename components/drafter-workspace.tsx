@@ -53,7 +53,7 @@ export function DrafterWorkspace({ seedUpdates }: Props) {
             kind: "error",
             message:
               body?.error === "rate_limited"
-                ? "Daily evaluation limit reached. Try again tomorrow."
+                ? "daily evaluation limit reached"
                 : (body?.message ?? `HTTP ${res.status}`),
           });
           return;
@@ -63,7 +63,7 @@ export function DrafterWorkspace({ seedUpdates }: Props) {
       } catch (err) {
         setFlagStatus({
           kind: "error",
-          message: err instanceof Error ? err.message : "Network error",
+          message: err instanceof Error ? err.message : "network error",
         });
       }
     },
@@ -125,7 +125,7 @@ export function DrafterWorkspace({ seedUpdates }: Props) {
   }, [form, runEvaluation]);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+    <div className="grid gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-12">
       <div>
         <UpdateForm
           form={form}
@@ -134,14 +134,16 @@ export function DrafterWorkspace({ seedUpdates }: Props) {
           generating={streaming}
         />
       </div>
-      <div className="space-y-5 lg:sticky lg:top-[72px] lg:self-start">
+      <div className="space-y-6 lg:sticky lg:top-[92px] lg:self-start">
         {rateLimited ? (
-          <div className="rounded-2xl border border-flag-border bg-flag-bg px-4 py-3 text-[13px] text-flag-ink">
+          <div className="border border-claret/40 bg-claret-wash/40 px-4 py-3 text-[12.5px] leading-relaxed text-claret">
+            <div className="smallcaps mb-0.5 text-claret">Rate limit</div>
             {rateLimited}
           </div>
         ) : null}
         <GeneratedUpdate
           month={form.month}
+          sender={form.sender}
           text={draft}
           streaming={streaming}
         />

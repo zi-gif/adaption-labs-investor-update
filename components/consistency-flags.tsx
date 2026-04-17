@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import type { ConsistencyFlag } from "@/lib/types";
-import { Card, GhostButton, SectionHeading } from "./ui";
+import { GhostButton, Panel } from "./ui";
 
 type Status =
   | { kind: "idle" }
@@ -20,59 +20,94 @@ const DRIFT_LABEL: Record<string, string> = {
   contradiction: "Contradiction",
   "softened language": "Softened",
   "thread resolved": "Resolved",
-  "positive overshoot": "Positive overshoot",
+  "positive overshoot": "Overshoot",
 };
 
-const PRIORITY_TONE: Record<string, string> = {
-  high: "bg-accent-wash text-accent-deep border-accent/40",
-  medium: "bg-flag-bg text-flag-ink border-flag-border",
-  low: "bg-line-soft/50 text-ink-soft border-line",
+const PRIORITY_DOT: Record<string, string> = {
+  high: "bg-ember",
+  medium: "bg-gold",
+  low: "bg-ink-4",
+};
+
+const PRIORITY_LABEL: Record<string, string> = {
+  high: "high priority",
+  medium: "medium",
+  low: "low",
 };
 
 const DRIFT_TONE: Record<string, string> = {
-  "thread resolved": "bg-positive-bg text-positive-ink",
-  "positive overshoot": "bg-positive-bg text-positive-ink",
+  "thread resolved": "border-gold/50 bg-gold-wash/40",
+  "positive overshoot": "border-teal-soft/60 bg-teal-wash/40",
+  silence: "border-ember/30 bg-ember-wash/30",
+  contradiction: "border-claret/40 bg-claret-wash/30",
+  "softened language": "border-rule bg-paper/60",
 };
 
 export function ConsistencyFlags({ status, onRetry }: Props) {
+  const aside =
+    status.kind === "ready"
+      ? `${status.flags.length} flag${status.flags.length === 1 ? "" : "s"}`
+      : status.kind === "loading"
+        ? "reading…"
+        : undefined;
+
   return (
-    <Card className="p-6">
-      <div className="mb-4 flex items-start justify-between gap-4">
-        <SectionHeading
-          eyebrow="Consistency engine"
-          title="What investors will notice"
-          description="Drift across prior months (silence, contradiction, resolved threads). The eval pass runs after the draft and is read-only."
-        />
+    <Panel label="Consistency engine" aside={aside}>
+      <div className="mb-5 border-b border-rule pb-4">
+        <div
+          className="display text-[22px] leading-tight text-ink"
+          style={{ fontVariationSettings: '"opsz" 144, "SOFT" 40' }}
+        >
+          What an investor will{" "}
+          <span
+            className="display-italic text-ember-deep"
+            style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100' }}
+          >
+            notice.
+          </span>
+        </div>
+        <p className="mt-2 max-w-[52ch] text-[12.5px] leading-relaxed text-ink-3">
+          A second read-only pass over the draft and every prior month.
+          Priority is weighted by the lead investor's thesis.
+        </p>
       </div>
 
       {status.kind === "idle" ? (
-        <p className="text-[13px] text-ink-faint">
+        <p className="text-[13px] text-ink-4">
           Generate an update to run the consistency engine.
         </p>
       ) : null}
 
       {status.kind === "loading" ? (
-        <div className="space-y-2">
+        <ul className="space-y-3">
           {[0, 1, 2].map((i) => (
-            <div
+            <li
               key={i}
-              className="h-16 animate-pulse rounded-xl bg-line-soft/70"
-            />
+              className="border border-rule bg-paper/40 px-4 py-4"
+              style={{ animation: `reveal 800ms ease-out ${i * 120}ms both` }}
+            >
+              <div className="mb-2 flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-ink-4 pulse-dot" />
+                <div className="h-2.5 w-24 bg-rule-soft" />
+              </div>
+              <div className="mb-2 h-3 w-3/4 bg-rule-soft" />
+              <div className="h-3 w-1/2 bg-rule-soft" />
+            </li>
           ))}
-        </div>
+        </ul>
       ) : null}
 
       {status.kind === "error" ? (
-        <div className="rounded-xl border border-line bg-line-soft/40 p-4">
-          <p className="text-[13px] font-medium text-ink">
-            Flags unavailable.
+        <div className="border border-claret/30 bg-claret-wash/30 p-5">
+          <div className="smallcaps mb-1 text-claret">
+            Flags unavailable
+          </div>
+          <p className="max-w-[48ch] text-[13px] leading-relaxed text-ink-2">
+            The evaluation pass couldn't be parsed. The draft is intact, and
+            you can retry the eval without regenerating.
           </p>
-          <p className="mt-1 max-w-[46ch] text-[12.5px] text-ink-soft">
-            The evaluation pass couldn't be parsed. Your draft is intact. You
-            can retry the eval without regenerating the draft.
-            <span className="block pt-1 text-ink-faint">
-              Reason: {status.message}
-            </span>
+          <p className="mt-2 text-[11.5px] text-ink-4">
+            Reason, {status.message}
           </p>
           <div className="mt-3">
             <GhostButton type="button" onClick={onRetry}>
@@ -84,53 +119,73 @@ export function ConsistencyFlags({ status, onRetry }: Props) {
 
       {status.kind === "ready" ? (
         status.flags.length === 0 ? (
-          <div className="rounded-xl border border-line bg-positive-bg/60 p-4">
-            <p className="text-[13px] font-medium text-positive-ink">
-              No drift detected.
-            </p>
-            <p className="mt-1 text-[12.5px] text-ink-soft">
-              The draft is consistent with every thread in prior updates. Rare,
-              worth sanity-checking against the prior-updates tab before
+          <div className="border border-teal-soft/60 bg-teal-wash/40 p-5">
+            <div className="smallcaps mb-1 text-teal">
+              No drift detected
+            </div>
+            <p className="max-w-[48ch] text-[13px] leading-relaxed text-ink-2">
+              The draft is consistent with every thread in prior updates.
+              Worth a quick sanity pass against the prior-issues tab before
               sending.
             </p>
           </div>
         ) : (
-          <ul className="space-y-3">
+          <ol className="space-y-3">
             {status.flags.map((f, i) => (
               <li
                 key={i}
                 className={clsx(
-                  "rounded-xl border p-4",
-                  DRIFT_TONE[f.drift_type] ??
-                    "border-line/80 bg-line-soft/30",
+                  "reveal border p-5",
+                  DRIFT_TONE[f.drift_type] ?? "border-rule bg-paper/50",
                 )}
+                style={{ animationDelay: `${i * 90}ms` }}
               >
-                <div className="mb-2 flex flex-wrap items-center gap-1.5 text-[11px] uppercase tracking-[0.06em]">
+                {/* Head: priority dot, drift pill, source */}
+                <div className="mb-3 flex flex-wrap items-center gap-2 text-[11px]">
+                  <span className="mono tabular text-ink-4">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
                   <span
                     className={clsx(
-                      "rounded-full border px-2 py-0.5 font-medium",
-                      PRIORITY_TONE[f.priority] ?? PRIORITY_TONE.low,
+                      "inline-block h-1.5 w-1.5 rounded-full",
+                      PRIORITY_DOT[f.priority] ?? PRIORITY_DOT.low,
                     )}
-                  >
-                    {f.priority}
-                  </span>
-                  <span className="rounded-full bg-surface/80 px-2 py-0.5 text-ink-soft">
+                    aria-label={PRIORITY_LABEL[f.priority] ?? ""}
+                    title={PRIORITY_LABEL[f.priority] ?? ""}
+                  />
+                  <span className="smallcaps !text-[10px] text-ink-2">
                     {DRIFT_LABEL[f.drift_type] ?? f.drift_type}
                   </span>
-                  <span className="text-ink-faint">{f.source_month}</span>
+                  <span className="h-px flex-1 bg-rule/60" />
+                  <span className="mono tabular text-[10.5px] uppercase text-ink-4">
+                    {f.source_month}
+                  </span>
                 </div>
-                <blockquote className="mb-2 border-l-2 border-accent-soft/70 pl-3 text-[13px] italic text-ink-soft">
+
+                {/* Excerpt with call-out quote */}
+                <blockquote
+                  className="display-italic mb-3 pl-3 text-[15px] leading-snug text-ink-2"
+                  style={{ fontVariationSettings: '"opsz" 144, "SOFT" 80' }}
+                >
+                  <span className="mr-1 text-ember-deep">“</span>
                   {f.excerpt}
+                  <span className="ml-0.5 text-ember-deep">”</span>
                 </blockquote>
+
+                {/* Suggested addition */}
                 <p className="text-[13.5px] leading-relaxed text-ink">
+                  <span className="smallcaps mr-2 !text-[9.5px] text-ember-deep">
+                    Suggested
+                  </span>
                   {f.suggested_addition}
                 </p>
+
                 {f.relevant_investors.length > 0 ? (
-                  <div className="mt-2 flex flex-wrap gap-1">
+                  <div className="mt-3 flex flex-wrap gap-1">
                     {f.relevant_investors.map((inv) => (
                       <span
                         key={inv}
-                        className="rounded-full bg-teal-wash/80 px-2 py-0.5 text-[11px] text-teal"
+                        className="border border-teal/30 bg-teal-wash/60 px-2 py-0.5 text-[10.5px] text-teal"
                       >
                         {inv}
                       </span>
@@ -139,10 +194,10 @@ export function ConsistencyFlags({ status, onRetry }: Props) {
                 ) : null}
               </li>
             ))}
-          </ul>
+          </ol>
         )
       ) : null}
-    </Card>
+    </Panel>
   );
 }
 
