@@ -15,6 +15,17 @@ export const DEMO_FORM: UpdateFormData = {
     adaptiveIntelligenceWaitlist: 127,
     adaptiveInterfacesStatus: "In design",
   },
+  metricVisibility: {
+    teamSize: true,
+    newHires: true,
+    newHireCountries: true,
+    cashOnHand: true,
+    monthlyBurn: true,
+    runway: true,
+    adaptiveDataCustomers: true,
+    adaptiveIntelligenceWaitlist: true,
+    adaptiveInterfacesStatus: true,
+  },
   wins: [
     "First external deployment of Adaptive Data with a Fortune 500 financial services partner. Early signal: 40% reduction in retraining cost vs. their current fine-tuning pipeline.",
     "Hired Dr. Amara Okonkwo, ex-DeepMind, as Research Lead in London. First senior research hire outside North America.",
@@ -47,6 +58,12 @@ export const DEMO_FORM: UpdateFormData = {
       url: "https://techcrunch.com",
     },
   ],
+  sectionNotes: {
+    frame: "",
+    signals: "",
+    narrative: "",
+    leverage: "",
+  },
 };
 
 export const COUNTRY_OPTIONS = [

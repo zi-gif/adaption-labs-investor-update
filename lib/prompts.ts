@@ -53,7 +53,8 @@ export function buildDraftSystemPrompt(): string {
     "",
     "- Target length: approximately 300 words. Short, scannable, dense.",
     "- Open with a one-paragraph narrative framing (2-3 sentences) that reflects the TL;DR and one most important signal from the month.",
-    "- A **Metrics** section with each metric on its own line, short commentary only where it adds information.",
+    "- A **Metrics** section with each metric on its own line, short commentary only where it adds information. Only include metrics that appear in the user's Metrics block; do not invent or infer values for metrics the sender has intentionally excluded.",
+    "- If the user's prompt includes `Additional notes` blocks for a section, treat them as high-signal context from the sender. Fold the substance into the relevant section naturally; do not print a `Notes:` label or copy them verbatim.",
     "- A **Wins** section (3-5 bullets).",
     "- A **Risks / what is uncertain** section. Be honest. Silence creates its own narrative.",
     "- A **Key hires** section, one line per hire.",
@@ -68,13 +69,61 @@ export function buildDraftSystemPrompt(): string {
 }
 
 export function buildDraftUserPrompt(form: UpdateFormData): string {
-  const runway =
-    form.metrics.cashOnHand && form.metrics.monthlyBurn
-      ? (
-          (form.metrics.cashOnHand * 1_000_000) /
-          (form.metrics.monthlyBurn * 1_000)
-        ).toFixed(1)
-      : "not available";
+  const v = form.metricVisibility;
+
+  const metricLines: string[] = [];
+  if (v.teamSize) {
+    metricLines.push(`- Team size: ${form.metrics.teamSize ?? "n/a"}`);
+  }
+  if (v.newHires) {
+    metricLines.push(
+      `- New hires this period: ${form.metrics.newHires ?? "n/a"}`,
+    );
+  }
+  if (v.newHireCountries) {
+    metricLines.push(
+      `- New hire countries: ${
+        form.metrics.newHireCountries.length
+          ? form.metrics.newHireCountries.join(", ")
+          : "n/a"
+      }`,
+    );
+  }
+  if (v.cashOnHand) {
+    metricLines.push(`- Cash on hand: $${form.metrics.cashOnHand ?? "n/a"}M`);
+  }
+  if (v.monthlyBurn) {
+    metricLines.push(
+      `- Monthly burn: $${form.metrics.monthlyBurn ?? "n/a"}K`,
+    );
+  }
+  if (v.runway && form.metrics.cashOnHand && form.metrics.monthlyBurn) {
+    const runway = (
+      (form.metrics.cashOnHand * 1_000_000) /
+      (form.metrics.monthlyBurn * 1_000)
+    ).toFixed(1);
+    metricLines.push(`- Runway: ${runway} months`);
+  }
+  if (v.adaptiveDataCustomers) {
+    metricLines.push(
+      `- Adaptive Data: ${form.metrics.adaptiveDataCustomers ?? "n/a"} customers onboarding`,
+    );
+  }
+  if (v.adaptiveIntelligenceWaitlist) {
+    metricLines.push(
+      `- Adaptive Intelligence: ${form.metrics.adaptiveIntelligenceWaitlist ?? "n/a"} on waitlist`,
+    );
+  }
+  if (v.adaptiveInterfacesStatus) {
+    metricLines.push(
+      `- Adaptive Interfaces status: ${form.metrics.adaptiveInterfacesStatus}`,
+    );
+  }
+
+  const metricsBlock =
+    metricLines.length > 0
+      ? metricLines.join("\n")
+      : "- (the sender has chosen to exclude all structured metrics from this update; lead with narrative rather than numbers)";
 
   const keyHiresBlock =
     form.keyHires.length === 0
@@ -91,27 +140,23 @@ export function buildDraftUserPrompt(form: UpdateFormData): string {
       ? "- (none)"
       : form.press.map((p) => `- [${p.title}](${p.url})`).join("\n");
 
+  const notes = form.sectionNotes;
+  const notesBlock = (label: string, body: string) =>
+    body.trim().length > 0
+      ? `\n**Additional notes, ${label} (from sender, high signal).** ${body.trim()}`
+      : "";
+
   return [
     `# Structured inputs for ${form.month}`,
     `Sender: ${form.sender}`,
     "",
     `## TL;DR`,
     form.tldr || "(blank)",
+    notesBlock("frame", notes.frame),
     "",
-    `## Metrics`,
-    `- Team size: ${form.metrics.teamSize ?? "n/a"}`,
-    `- New hires this period: ${form.metrics.newHires ?? "n/a"}`,
-    `- New hire countries: ${
-      form.metrics.newHireCountries.length
-        ? form.metrics.newHireCountries.join(", ")
-        : "n/a"
-    }`,
-    `- Cash on hand: $${form.metrics.cashOnHand ?? "n/a"}M`,
-    `- Monthly burn: $${form.metrics.monthlyBurn ?? "n/a"}K`,
-    `- Runway: ${runway} months`,
-    `- Adaptive Data: ${form.metrics.adaptiveDataCustomers ?? "n/a"} customers onboarding`,
-    `- Adaptive Intelligence: ${form.metrics.adaptiveIntelligenceWaitlist ?? "n/a"} on waitlist`,
-    `- Adaptive Interfaces status: ${form.metrics.adaptiveInterfacesStatus}`,
+    `## Metrics (only these; any not listed have been intentionally excluded by the sender)`,
+    metricsBlock,
+    notesBlock("signals", notes.signals),
     "",
     `## Wins (raw notes)`,
     form.wins || "(none)",
@@ -121,12 +166,14 @@ export function buildDraftUserPrompt(form: UpdateFormData): string {
     "",
     `## Key hires spotlight`,
     keyHiresBlock,
+    notesBlock("narrative", notes.narrative),
     "",
     `## Asks (raw notes)`,
     form.asks || "(none)",
     "",
     `## Press and links`,
     pressBlock,
+    notesBlock("leverage", notes.leverage),
     "",
     `# Write the update now.`,
   ].join("\n");

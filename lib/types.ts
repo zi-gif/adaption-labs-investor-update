@@ -10,6 +10,25 @@ export type PressItem = {
   url: string;
 };
 
+export type MetricVisibility = {
+  teamSize: boolean;
+  newHires: boolean;
+  newHireCountries: boolean;
+  cashOnHand: boolean;
+  monthlyBurn: boolean;
+  runway: boolean;
+  adaptiveDataCustomers: boolean;
+  adaptiveIntelligenceWaitlist: boolean;
+  adaptiveInterfacesStatus: boolean;
+};
+
+export type SectionNotes = {
+  frame: string;
+  signals: string;
+  narrative: string;
+  leverage: string;
+};
+
 export type UpdateFormData = {
   month: string;
   sender: "Sara Hooker (CEO)" | "Sudip Roy (CTO)";
@@ -27,11 +46,13 @@ export type UpdateFormData = {
       | "In design"
       | "Early prototype";
   };
+  metricVisibility: MetricVisibility;
   wins: string;
   challenges: string;
   keyHires: KeyHire[];
   asks: string;
   press: PressItem[];
+  sectionNotes: SectionNotes;
 };
 
 export type PriorUpdateDoc = {
